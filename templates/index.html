@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Markdown Viewer</title>
+    <link rel="stylesheet" href="/static/main.css">
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: sans-serif; }
+        .container { display: flex; height: 100%; }
+        #sidebar { position: relative; width: 300px; height: 100%; border-right: 1px solid #ccc; display: flex; flex-direction: column; }
+        #sidebar-content { flex-grow: 1; }
+        #content { flex-grow: 1; height: 100%; }
+        iframe { width: 100%; height: 100%; border: 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="sidebar">
+            <div id="sidebar-content">
+                <iframe name="list_frame" src="/files/"></iframe>
+            </div>
+            <div class="footer">
+                <button id="shutdown-btn" class="shutdown-btn">Shutdown Server</button>
+            </div>
+        </div>
+        <div id="content">
+            <iframe name="content_frame" src="/welcome"></iframe>
+        </div>
+    </div>
+
+    <!-- Shutdown Confirmation Modal -->
+    <div id="shutdown-modal" class="modal-overlay">
+        <div class="modal-content">
+            <p>Are you sure you want to shut down the server?</p>
+            <div class="modal-buttons">
+                <button id="shutdown-yes-btn" class="yes-btn">Yes, Shutdown</button>
+                <button id="shutdown-no-btn" class="no-btn">No, Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/main.js"></script>
+</body>
+</html>
