@@ -12,13 +12,37 @@ A simple, single-binary web server that acts as a file browser and Markdown rend
 
 ## Usage
 
-1.  Download the latest binary for your operating system from the [Releases](https://github.com/magifd2/markdown-viewer/releases) page.
-2.  Place the binary in the directory you want to browse.
+1.  Download the latest `mdv` binary for your operating system from the [Releases](https://github.com/magifd2/markdown-viewer/releases) page.
+2.  Place the `mdv` binary in the directory you want to browse.
 3.  Run the executable from your terminal:
     ```bash
-    ./markdown-viewer
+    ./mdv
     ```
-4.  Open your web browser and navigate to `http://127.0.0.1:8080`.
+4.  Open your web browser and navigate to `http://127.0.0.1:8888`.
+
+### Configuration
+
+`mdv` can be configured using a `config.json` file or command-line flags. The configuration is loaded in the following order of precedence (later ones override earlier ones):
+
+1.  Default values
+2.  `config.json` in `$HOME/.config/mdv/`
+3.  `config.json` in the current working directory
+4.  Environment variables (prefixed with `MDV_`, e.g., `MDV_PORT=9000`)
+5.  Command-line flags
+
+For an example configuration file, see `config.json.example`.
+
+### Command-Line Options
+
+```
+Usage of ./mdv:
+  -d string
+        Directory to serve (default ".")
+  -o
+        Open browser automatically
+  -p int
+        Port to listen on (default 8888)
+```
 
 ## Build from Source
 
@@ -29,14 +53,16 @@ To build the project from source, you need to have Go and Make installed.
     git clone https://github.com/magifd2/markdown-viewer.git
     cd markdown-viewer
     ```
-2.  Build the binary:
+2.  Build the `mdv` binary:
     ```bash
     make build
     ```
+    The `mdv` binary will be generated in the `bin/<OS>-<ARCH>/` directory (e.g., `bin/darwin-arm64/mdv`).
 3.  Run the application:
     ```bash
     make run
     ```
+    This will build and then run the `mdv` application.
 
 For cross-platform builds, see the `Makefile` for more options (`make help`).
 

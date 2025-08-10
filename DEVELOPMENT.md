@@ -64,3 +64,56 @@ This roadmap is broken down into phases to ensure iterative and manageable devel
 - [ ] Refine error handling and provide user-friendly error pages.
 - [ ] Create a build script or Makefile for easy compilation.
 - [ ] Write final usage instructions in the `README.md`.
+
+## 5. Configuration & CLI
+
+This section details the application's configuration system and command-line interface (CLI) options.
+
+### 5.1. Configuration Loading
+
+The application uses `spf13/viper` for flexible configuration management. Settings are loaded from multiple sources in the following order of precedence (later ones override earlier ones):
+
+1.  **Default values:** Hardcoded defaults within the application (e.g., `port: 8888`, `open: false`, `target_dir: .`).
+2.  **Configuration files:**
+    *   `config.json` in `$HOME/.config/mdv/`
+    *   `config.json` in the current working directory
+3.  **Environment variables:** Prefixed with `MDV_` (e.g., `MDV_PORT=9000`). Dot notation in config keys is replaced with underscores (e.g., `MDV_TARGET_DIR` for `target_dir`).
+4.  **Command-line flags:** Overrides all other settings.
+
+### 5.2. Command-Line Options
+
+The application supports the following command-line flags, parsed using Go's standard `flag` package:
+
+*   `-p <port>` or `--port <port>`: Specifies the port to listen on (e.g., `-p 9000`).
+*   `-o` or `--open`: Automatically opens the default web browser to the application URL upon startup.
+*   `-d <directory>` or `--dir <directory>`: Specifies the root directory to serve. If not set, the current working directory is used.
+*   `-h` or `--help`: Displays the help message with all available options.
+
+## 6. Build & Deployment
+
+This section outlines the build process and deployment considerations for the Markdown Viewer.
+
+### 6.1. Binary Naming and Output Paths
+
+The application binary is named `mdv`. When built using `make build`, the executable is placed in a platform-specific subdirectory within the `bin/` directory (e.g., `bin/darwin-arm64/mdv` for macOS ARM64).
+
+### 6.2. Build Commands
+
+*   `make build`: Compiles the application for the current operating system and architecture.
+*   `make run`: Builds and then runs the application.
+*   `make clean`: Removes all build artifacts and the `bin/` directory.
+*   `make cross-compile`: Builds binaries for all supported platforms (macOS, Linux, Windows).
+*   `make package-all`: Packages all cross-compiled binaries into archives.
+
+## Known Issues
+
+### Markdown Code Block Rendering Issues
+
+There are several known issues related to how Markdown code blocks are rendered:
+
+1.  **Incorrect Line Breaks:** Code within fenced code blocks (` ``` `) may not display with correct line breaks, appearing as a single continuous line.
+2.  **Incorrect Indentation:** The indentation of elements immediately following a code block may be incorrect, appearing at the same level as the code block itself.
+3.  **Language Specifier Displayed:** The language specifier (e.g., ` ```bash `) may be rendered as plain text within the code block, rather than being correctly interpreted for syntax highlighting.
+4.  **Mermaid Rendering Failure:** Mermaid diagrams may not render correctly, despite the presence of the Mermaid.js library and associated JavaScript logic.
+
+These issues are believed to stem from the interaction between the `blackfriday` Markdown parser's HTML output, and the client-side `highlight.js` and Mermaid.js libraries. Specifically, there appear to be discrepancies in how `blackfriday` generates the HTML structure for code blocks (e.g., `class="language-xxx"` attributes) and how `highlight.js` and Mermaid.js expect these structures to be for proper rendering and styling. Further investigation into `blackfriday`'s rendering behavior and its compatibility with client-side libraries is required.
