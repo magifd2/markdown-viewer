@@ -17,10 +17,10 @@ The primary goal is to create a lightweight, portable, and easy-to-use tool for 
 
 - **Backend Language:** Go
 - **Web Server:** Standard `net/http` package.
-- **Markdown Parsing:** [blackfriday v2](https://github.com/russross/blackfriday)
-    - **Reasoning:** Initially, `goldmark` was chosen, but persistent issues with fetching its dependencies (`go get`) in the development environment necessitated a switch. `blackfriday` is a robust, widely-used, pure Go alternative that does not have these dependency issues.
+- **Markdown Parsing:** [goldmark](https://github.com/yuin/goldmark)
+    - **Reasoning:** Switched from `blackfriday` due to rendering quality issues, particularly with code blocks inside lists. `goldmark` is a modern, CommonMark-compliant parser with excellent GFM extension support, resulting in more accurate and predictable HTML output.
 - **HTML Sanitization:** [bluemonday](https://github.com/microcosm-cc/bluemonday)
-    - **Reasoning:** Introduced to prevent XSS attacks from malicious Markdown content. It sanitizes the HTML output from `blackfriday` before rendering.
+    - **Reasoning:** Introduced to prevent XSS attacks from malicious Markdown content. It sanitizes the HTML output from `goldmark` before rendering.
 - **Syntax Highlighting:** [highlight.js](https://highlightjs.org/)
     - **Reasoning:** Switched from a Go-based highlighter to a client-side library to decouple it from the backend Markdown parser. `highlight.js` is powerful and supports a vast number of languages.
 - **Diagram Rendering:** [Mermaid.js](https://mermaid-js.github.io/mermaid/)
@@ -59,13 +59,14 @@ This roadmap is broken down into phases to ensure iterative and manageable devel
 - [x] Included Mermaid.js library and ensured ````mermaid` blocks are rendered.
 - [x] Created a `tests` directory with a test file for verifying functionality.
 
-### **Phase 5: Security Hardening (v0.1.1) (Completed)**
+### **Phase 5: Security Hardening & Bug Fixes (v0.1.1) (Completed)**
 
 - [x] **Directory Traversal:** Replaced `http.ServeMux` with a custom router to validate request paths and prevent access to files outside the target directory.
 - [x] **Cross-Site Scripting (XSS):** Introduced `bluemonday` to sanitize HTML generated from Markdown, preventing malicious script execution.
-- **Dependency Vulnerabilities:** Updated dependencies to patch known vulnerabilities.
-- **Code Hardening:** Addressed multiple issues identified by `gosec` (unhandled errors, missing timeouts, command injection risks).
-- **Browser Auto-Open:** Re-enabled the feature with enhanced security validation.
+- [x] **Dependency Vulnerabilities:** Updated dependencies to patch known vulnerabilities.
+- [x] **Code Hardening:** Addressed multiple issues identified by `gosec` (unhandled errors, missing timeouts, command injection risks).
+- [x] **Browser Auto-Open:** Re-enabled the feature with enhanced security validation.
+- [x] **Rendering Engine:** Replaced `blackfriday` with `goldmark` to fix rendering issues with code blocks and lists.
 
 ### **Phase 6: UI/UX Improvements & Finalization**
 
@@ -117,10 +118,4 @@ The application binary is named `mdv`. When built using `make build`, the execut
 
 ## Known Issues
 
-There are several known issues related to how Markdown code blocks are rendered:
-
-1.  **Incorrect Line Breaks:** Code within fenced code blocks (` ``` `) may not display with correct line breaks, appearing as a single continuous line.
-2.  **Incorrect Indentation:** The indentation of elements immediately following a code block may be incorrect, appearing at the same level as the code block itself.
-3.  **Language Specifier Displayed:** The language specifier (e.g., ` ```bash `) may be rendered as plain text within the code block, rather than being correctly interpreted for syntax highlighting.
-
-These issues are believed to stem from the interaction between the `blackfriday` Markdown parser's HTML output, and the client-side `highlight.js` library. Further investigation into `blackfriday`'s rendering behavior and its compatibility with client-side libraries is required.
+All major rendering issues have been resolved by migrating to the `goldmark` parser. Any remaining issues are likely minor and related to CSS styling or client-side script interactions.
