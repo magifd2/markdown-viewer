@@ -70,15 +70,18 @@ build-linux:
 	@echo "Building for Linux (amd64)..."
 	@mkdir -p $(OUTPUT_DIR)/linux-amd64
 	@GOOS=linux GOARCH=amd64 $(GOBUILD) $(LDFLAGS) -o $(OUTPUT_DIR)/linux-amd64/$(BINARY_NAME) .
+	@cp NOTICE.md $(OUTPUT_DIR)/linux-amd64/
 	@echo "Building for Linux (arm64)..."
 	@mkdir -p $(OUTPUT_DIR)/linux-arm64
 	@GOOS=linux GOARCH=arm64 $(GOBUILD) $(LDFLAGS) -o $(OUTPUT_DIR)/linux-arm64/$(BINARY_NAME) .
+	@cp NOTICE.md $(OUTPUT_DIR)/linux-arm64/
 
 # Build for Windows (amd64)
 build-windows:
 	@echo "Building for Windows (amd64)..."
 	@mkdir -p $(OUTPUT_DIR)/windows-amd64
 	@GOOS=windows GOARCH=amd64 $(GOBUILD) $(LDFLAGS) -o $(OUTPUT_DIR)/windows-amd64/$(BINARY_NAME).exe .
+	@cp NOTICE.md $(OUTPUT_DIR)/windows-amd64/
 
 # Build macOS Universal Binary
 build-mac-universal:
@@ -89,10 +92,11 @@ build-mac-universal:
 	@lipo -create -output $(OUTPUT_DIR)/darwin-universal/$(BINARY_NAME) $(OUTPUT_DIR)/$(BINARY_NAME)-darwin-amd64 $(OUTPUT_DIR)/$(BINARY_NAME)-darwin-arm64
 	@codesign -s - $(OUTPUT_DIR)/darwin-universal/$(BINARY_NAME)
 	@rm $(OUTPUT_DIR)/$(BINARY_NAME)-darwin-amd64 $(OUTPUT_DIR)/$(BINARY_NAME)-darwin-arm64
+	@cp NOTICE.md $(OUTPUT_DIR)/darwin-universal/
 	@echo "Created Universal binary at $(OUTPUT_DIR)/darwin-universal/$(BINARY_NAME)"
 
 # Package all binaries into archives
-package-all: 
+package-all: cross-compile
 	@echo "Packaging all binaries..."
 	$(MAKE) package-darwin
 	$(MAKE) package-linux
@@ -101,15 +105,15 @@ package-all:
 # Package macOS binary
 package-darwin:
 	@echo "Packaging macOS binary..."
-	@cd $(OUTPUT_DIR)/darwin-universal && tar -czvf ../$(BINARY_NAME)-$(VERSION)-darwin-universal.tar.gz $(BINARY_NAME)
+	@cd $(OUTPUT_DIR)/darwin-universal && tar -czvf ../$(BINARY_NAME)-$(VERSION)-darwin-universal.tar.gz $(BINARY_NAME) NOTICE.md
 
 # Package Linux binaries
 package-linux:
 	@echo "Packaging Linux binaries..."
-	@cd $(OUTPUT_DIR)/linux-amd64 && tar -czvf ../$(BINARY_NAME)-$(VERSION)-linux-amd64.tar.gz $(BINARY_NAME)
-	@cd $(OUTPUT_DIR)/linux-arm64 && tar -czvf ../$(BINARY_NAME)-$(VERSION)-linux-arm64.tar.gz $(BINARY_NAME)
+	@cd $(OUTPUT_DIR)/linux-amd64 && tar -czvf ../$(BINARY_NAME)-$(VERSION)-linux-amd64.tar.gz $(BINARY_NAME) NOTICE.md
+	@cd $(OUTPUT_DIR)/linux-arm64 && tar -czvf ../$(BINARY_NAME)-$(VERSION)-linux-arm64.tar.gz $(BINARY_NAME) NOTICE.md
 
 # Package Windows binary
 package-windows:
 	@echo "Packaging Windows binary..."
-	@cd $(OUTPUT_DIR)/windows-amd64 && zip -r ../$(BINARY_NAME)-$(VERSION)-windows-amd64.zip $(BINARY_NAME).exe
+	@cd $(OUTPUT_DIR)/windows-amd64 && zip -r ../$(BINARY_NAME)-$(VERSION)-windows-amd64.zip $(BINARY_NAME).exe NOTICE.md

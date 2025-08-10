@@ -7,7 +7,7 @@ A simple, single-binary web server that acts as a file browser and Markdown rend
 - **2-Pane View:** A persistent, expandable file tree on the left and a content viewer on the right.
 - **Single Binary:** No installation or external dependencies required.
 - **Local First:** Serves files and directories from the current location where you run it.
-- **Markdown Rendering:** Renders Markdown files with GitHub-like styling, syntax highlighting, and Mermaid diagram support.
+- **Markdown Rendering:** Renders Markdown files with GitHub-like styling, built-in syntax highlighting, and bundled Mermaid diagram support.
 - **Secure by Default:** Includes protection against directory traversal attacks and sanitizes HTML to prevent Cross-Site Scripting (XSS).
 - **Graceful Shutdown:** Shuts down safely via a UI button or `Ctrl+C`.
 
@@ -66,3 +66,7 @@ For cross-platform builds, see the `Makefile` for more options (`make help`).
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+### Third-Party Licenses
+
+This project bundles third-party software components. Their licenses and attribution notices are available in the `NOTICE.md` file included in the distribution.
