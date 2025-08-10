@@ -2,14 +2,18 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"os/signal"
+	"runtime"
 	"syscall"
 	"time"
 
+	"markdown-viewer/internal/config"
 	"markdown-viewer/internal/server"
 )
 
@@ -20,40 +24,49 @@ func main() {
 	// --- Initialization ---
 	fmt.Printf("Starting Markdown Viewer %s\n", version)
 
-	if err := server.LoadTemplates("templates"); err != nil {
-		log.Fatalf("Failed to load templates: %v", err)
+	// Load configuration (from file/env first)
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		log.Fatalf("Failed to load configuration: %v", err)
 	}
 
-	// --- Server and Handler Setup ---
-	server.ShutdownChannel = make(chan struct{})
+	// Define command-line flags, overriding config values if set
+	flag.IntVar(&cfg.Port, "port", cfg.Port, "Port to listen on")
+	flag.BoolVar(&cfg.Open, "open", cfg.Open, "Open browser automatically")
+	flag.StringVar(&cfg.TargetDir, "dir", cfg.TargetDir, "Directory to serve")
 
-	mux := http.NewServeMux()
-
-	// Static file server for /static/ directory
-	fs := http.FileServer(http.Dir("./static"))
-	mux.Handle("/static/", http.StripPrefix("/static/", fs))
-
-	// Register application handlers
-	mux.HandleFunc("/", server.RootHandler)
-	mux.HandleFunc("/welcome", server.WelcomeHandler)
-	mux.HandleFunc("/files/", server.TreeViewHandler)
-	mux.HandleFunc("/view/", server.MarkdownViewHandler)
-	mux.HandleFunc("/api/list", server.ApiListHandler)
-	mux.HandleFunc("/api/shutdown", server.ShutdownHandler)
-
-	srv := &http.Server{
-		Addr:    "127.0.0.1:8080",
-		Handler: mux,
+	// Custom usage message
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "  %s [options]\n", os.Args[0])
+		fmt.Fprintln(os.Stderr, "Options:")
+		flag.PrintDefaults()
 	}
 
-	// --- Graceful Shutdown Setup ---
+	flag.Parse()
+
+	// Create new server instance
+	srv, err := server.NewServer(cfg)
+	if err != nil {
+		log.Fatalf("Failed to create server: %v", err)
+	}
+
+	// Start server in a goroutine
 	go func() {
-		fmt.Println("Server listening on http://127.0.0.1:8080")
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("listen: %s\n", err)
+			log.Fatalf("Server listen error: %v", err)
 		}
 	}()
 
+	// Open browser if configured
+	if cfg.Open {
+		url := fmt.Sprintf("http://127.0.0.1:%d", cfg.Port)
+		if err := openBrowser(url); err != nil {
+			log.Printf("Failed to open browser: %v", err)
+		}
+	}
+
+	// --- Graceful Shutdown Setup ---
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
@@ -74,4 +87,22 @@ func main() {
 	}
 
 	log.Println("Server exited gracefully")
+}
+
+// openBrowser opens the default web browser to the specified URL.
+func openBrowser(url string) error {
+	var cmd string
+	var args []string
+
+	switch runtime.GOOS {
+	case "windows":
+		cmd = "cmd"
+		args = []string{"/c", "start"}
+	case "darwin":
+		cmd = "open"
+	default: // "linux", "freebsd", "openbsd", "netbsd"
+		cmd = "xdg-open"
+	}
+	args = append(args, url)
+	return exec.Command(cmd, args...).Start()
 }

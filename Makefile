@@ -7,7 +7,7 @@ GOCLEAN=$(GOCMD) clean
 GOTEST=$(GOCMD) test
 
 # Project details
-BINARY_NAME=markdown-viewer
+BINARY_NAME=mdv
 OUTPUT_DIR=bin
 # Get the module path from go.mod
 MODULE_PATH := $(shell go list -m)
@@ -41,11 +41,12 @@ all: cross-compile package-all
 # Build for the current OS/Arch
 build:
 	@echo "Building for $(shell go env GOOS)/$(shell go env GOARCH)..."
-	@$(GOBUILD) $(LDFLAGS) -o $(BINARY_NAME) .
+	@mkdir -p $(OUTPUT_DIR)/$(shell go env GOOS)-$(shell go env GOARCH)
+	@$(GOBUILD) $(LDFLAGS) -o $(OUTPUT_DIR)/$(shell go env GOOS)-$(shell go env GOARCH)/$(BINARY_NAME) .
 
 # Run the application
 run: build
-	@./$(BINARY_NAME)
+	@$(OUTPUT_DIR)/$(shell go env GOOS)-$(shell go env GOARCH)/$(BINARY_NAME)
 
 # Run tests
 test:
@@ -60,7 +61,6 @@ vulncheck:
 # Clean up build artifacts
 clean:
 	@echo "Cleaning up..."
-	@rm -f $(BINARY_NAME)
 	@rm -rf $(OUTPUT_DIR)
 
 # Cross-compile for all target platforms
