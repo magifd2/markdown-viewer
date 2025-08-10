@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.0.1] - 2025-08-10
+
+### Security
+- **Resolved GO-2025-3595 Vulnerability:** Updated `golang.org/x/net` from v0.26.0 to v0.38.0 to address a vulnerability related to incorrect neutralization of input during web page generation.
+
+### Added
+- **Local Bundling of Client-Side Assets:** `highlight.js` and `Mermaid.js` are now bundled directly with the application, removing external CDN dependencies for offline and closed-network environments.
+- **Third-Party License Notice:** Included `NOTICE.md` in release packages for compliance with third-party software licenses.
+
+### Changed
+- **Updated Documentation:** `DEVELOPMENT.md` and `README.md` have been updated to reflect local asset bundling and license information.
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
