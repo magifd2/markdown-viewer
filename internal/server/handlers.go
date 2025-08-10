@@ -1,6 +1,7 @@
 package server
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -14,7 +15,8 @@ import (
 	"markdown-viewer/internal/filebrowser"
 
 	"github.com/microcosm-cc/bluemonday"
-	"github.com/russross/blackfriday/v2"
+	"github.com/yuin/goldmark"
+	"github.com/yuin/goldmark/extension"
 )
 
 // ShutdownChannel is used to signal server shutdown from an API call
@@ -81,14 +83,22 @@ func (s *Server) MarkdownViewHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Render Markdown to HTML using blackfriday
-	output := blackfriday.Run(source, blackfriday.WithExtensions(blackfriday.CommonExtensions|blackfriday.HardLineBreak))
+	// Configure goldmark with GFM extensions
+	md := goldmark.New(
+		goldmark.WithExtensions(extension.GFM),
+	)
 
-	// Create a custom policy for sanitizing HTML which allows syntax highlighting and Mermaid diagrams.
+	// Render Markdown to HTML
+	var buf bytes.Buffer
+	if err := md.Convert(source, &buf); err != nil {
+		s.RenderError(w, http.StatusInternalServerError)
+		return
+	}
+	output := buf.Bytes()
+
+	// Create a custom policy for sanitizing HTML which allows syntax highlighting.
 	policy := bluemonday.UGCPolicy()
-	// Allow 'class' attribute for syntax highlighting (e.g., class="language-go") and for Mermaid.
-	// Note: blackfriday generates `language-mermaid`, which is then processed by a frontend script.
-	// We need to allow this class attribute to pass through.
+	// Allow 'class' attribute for syntax highlighting (e.g., class="language-go").
 	policy.AllowAttrs("class").Matching(regexp.MustCompile(`^language-[\w-]+$`)).OnElements("code")
 
 	sanitizedOutput := policy.SanitizeBytes(output)

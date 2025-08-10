@@ -4,9 +4,9 @@ go 1.24.6
 
 require (
 	github.com/microcosm-cc/bluemonday v1.0.27
-	github.com/russross/blackfriday/v2 v2.1.0
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/viper v1.20.1
+	github.com/yuin/goldmark v1.7.13
 )
 
 require (
