@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2025-08-10
+
+### Added
+- **Embedded UI Assets:** All CSS, JavaScript, and HTML templates are now embedded directly into the executable, making the application a truly single, self-contained binary. This eliminates the need for a separate `static/` or `templates/` directory alongside the binary at runtime.
+
+### Changed
+- **Refactored Asset Management:** The internal structure for managing UI assets has been refactored for better organization and maintainability.
+- **Updated Documentation:** `DEVELOPMENT.md` and `README.md` have been updated to reflect the single-binary nature and embedded assets.
+
+
 ## [1.0.1] - 2025-08-10
 
 ### Security
