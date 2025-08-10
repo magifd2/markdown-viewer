@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"markdown-viewer/internal/filebrowser"
@@ -83,8 +84,13 @@ func (s *Server) MarkdownViewHandler(w http.ResponseWriter, r *http.Request) {
 	// Render Markdown to HTML using blackfriday
 	output := blackfriday.Run(source, blackfriday.WithExtensions(blackfriday.CommonExtensions|blackfriday.HardLineBreak))
 
-	// Sanitize the HTML output to prevent XSS attacks. UGCPolicy is a good starting point.
+	// Create a custom policy for sanitizing HTML which allows syntax highlighting and Mermaid diagrams.
 	policy := bluemonday.UGCPolicy()
+	// Allow 'class' attribute for syntax highlighting (e.g., class="language-go") and for Mermaid.
+	// Note: blackfriday generates `language-mermaid`, which is then processed by a frontend script.
+	// We need to allow this class attribute to pass through.
+	policy.AllowAttrs("class").Matching(regexp.MustCompile(`^language-[\w-]+$`)).OnElements("code")
+
 	sanitizedOutput := policy.SanitizeBytes(output)
 
 	data := MarkdownData{
