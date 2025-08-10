@@ -1,5 +1,5 @@
 {
-  "port": 8080,       // Port to listen on. Default is 8080.
+  "port": 8888,       // Port to listen on. Default is 8888.
   "open": false,      // Whether to open the browser automatically on startup. Default is false.
   "target_dir": "." // Directory to serve. Default is the current working directory.
 }

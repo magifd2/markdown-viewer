@@ -10,14 +10,13 @@ import (
 // The values are read by viper from a config file, environment variables, or command line flags.
 type Config struct {
 	Port       int    `mapstructure:"port"`
-	Open       bool   `mapstructure:"open"`
-	TargetDir  string `mapstructure:"target_dir"`
+	Open       bool   `mapstructure:"open"`	TargetDir  string `mapstructure:"target_dir"`
 }
 
 // LoadConfig reads configuration from file and environment variables.
 func LoadConfig() (config Config, err error) {
 	// Set defaults
-	viper.SetDefault("port", 8080)
+	viper.SetDefault("port", 8888)
 	viper.SetDefault("open", false)
 	viper.SetDefault("target_dir", ".")
 
