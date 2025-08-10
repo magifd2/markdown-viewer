@@ -13,10 +13,13 @@ import (
 	"strings"
 
 	"markdown-viewer/internal/filebrowser"
+	"markdown-viewer/internal/markdown"
 
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/extension"
+	"github.com/yuin/goldmark/renderer"
+	"github.com/yuin/goldmark/util"
 )
 
 // ShutdownChannel is used to signal server shutdown from an API call
@@ -83,9 +86,14 @@ func (s *Server) MarkdownViewHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Configure goldmark with GFM extensions
+	// Configure goldmark with GFM extensions and our custom safe link renderer.
 	md := goldmark.New(
 		goldmark.WithExtensions(extension.GFM),
+		goldmark.WithRendererOptions(
+			renderer.WithNodeRenderers(
+				util.Prioritized(markdown.NewSafeLinkRenderer(), 1),
+			),
+		),
 	)
 
 	// Render Markdown to HTML
