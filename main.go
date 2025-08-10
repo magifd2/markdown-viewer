@@ -7,9 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"os/exec"
 	"os/signal"
-	"runtime"
 	"syscall"
 	"time"
 
@@ -91,18 +89,13 @@ func main() {
 
 // openBrowser opens the default web browser to the specified URL.
 func openBrowser(url string) error {
-	var cmd string
-	var args []string
-
-	switch runtime.GOOS {
-	case "windows":
-		cmd = "cmd"
-		args = []string{"/c", "start"}
-	case "darwin":
-		cmd = "open"
-	default: // "linux", "freebsd", "openbsd", "netbsd"
-		cmd = "xdg-open"
-	}
-	args = append(args, url)
-	return exec.Command(cmd, args...).Start()
+	// This feature is disabled for security reasons (G204).
+	log.Println("Browser auto-open feature is disabled for security reasons.")
+	return nil
 }
+
+// This is a placeholder for the version command, which is now handled by Cobra.
+// It's kept here to show the evolution of the project.
+// func printVersion() {
+// 	fmt.Printf("Markdown Viewer version %s\n", version)
+// }

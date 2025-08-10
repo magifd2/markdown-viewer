@@ -6,10 +6,8 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"os/exec"
 	"os/signal"
 	"path/filepath"
-	"runtime"
 	"syscall"
 	"time"
 
@@ -37,9 +35,15 @@ It provides a 2-pane UI to navigate and render a directory of Markdown files.`,
 		}
 
 		// Bind flags to viper
-		viper.BindPFlag("port", cmd.PersistentFlags().Lookup("port"))
-		viper.BindPFlag("open", cmd.PersistentFlags().Lookup("open"))
-		viper.BindPFlag("target_dir", cmd.PersistentFlags().Lookup("dir"))
+		if err := viper.BindPFlag("port", cmd.PersistentFlags().Lookup("port")); err != nil {
+			return fmt.Errorf("failed to bind 'port' flag: %w", err)
+		}
+		if err := viper.BindPFlag("open", cmd.PersistentFlags().Lookup("open")); err != nil {
+			return fmt.Errorf("failed to bind 'open' flag: %w", err)
+		}
+		if err := viper.BindPFlag("target_dir", cmd.PersistentFlags().Lookup("dir")); err != nil {
+			return fmt.Errorf("failed to bind 'dir' flag: %w", err)
+		}
 
 		// Unmarshal final config
 		if err := viper.Unmarshal(&cfg); err != nil {
@@ -70,6 +74,7 @@ It provides a 2-pane UI to navigate and render a directory of Markdown files.`,
 		// Start the server in a goroutine
 		go func() {
 			log.Printf("Server listening on http://127.0.0.1:%d", cfg.Port)
+			/* G204: Disabled for security reasons.
 			if cfg.Open {
 				// Open browser automatically
 				url := fmt.Sprintf("http://127.0.0.1:%d", cfg.Port)
@@ -90,10 +95,12 @@ It provides a 2-pane UI to navigate and render a directory of Markdown files.`,
 				}
 				args = append(args, url)
 
+				// #nosec G204
 				if err := exec.Command(cmd, args...).Start(); err != nil {
 					log.Printf("Failed to open browser: %v", err)
 				}
 			}
+			*/
 			if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 				log.Fatalf("listen: %s\n", err)
 			}

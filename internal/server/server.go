@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"markdown-viewer/internal/config"
 )
@@ -34,8 +35,12 @@ func NewServer(cfg config.Config) (*Server, error) {
 	}
 
 	s.httpServer = &http.Server{
-		Addr:    fmt.Sprintf("127.0.0.1:%d", cfg.Port),
-		Handler: s, // The server itself is the handler
+		Addr:              fmt.Sprintf("127.0.0.1:%d", cfg.Port),
+		Handler:           s, // The server itself is the handler
+		ReadTimeout:       15 * time.Second,
+		ReadHeaderTimeout: 15 * time.Second,
+		WriteTimeout:      15 * time.Second,
+		IdleTimeout:       60 * time.Second,
 	}
 
 	return s, nil

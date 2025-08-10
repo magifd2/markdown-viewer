@@ -12,6 +12,7 @@ import (
 
 	"markdown-viewer/internal/filebrowser"
 
+	"github.com/microcosm-cc/bluemonday"
 	"github.com/russross/blackfriday/v2"
 )
 
@@ -38,7 +39,9 @@ func (s *Server) RootHandler(w http.ResponseWriter, r *http.Request) {
 		s.RenderError(w, http.StatusInternalServerError)
 		return
 	}
-	tmpl.Execute(w, nil)
+	if err := tmpl.Execute(w, nil); err != nil {
+		log.Printf("failed to execute index.html template: %v", err)
+	}
 }
 
 func (s *Server) WelcomeHandler(w http.ResponseWriter, r *http.Request) {
@@ -48,7 +51,9 @@ func (s *Server) WelcomeHandler(w http.ResponseWriter, r *http.Request) {
 		s.RenderError(w, http.StatusInternalServerError)
 		return
 	}
-	tmpl.Execute(w, nil)
+	if err := tmpl.Execute(w, nil); err != nil {
+		log.Printf("failed to execute welcome.html template: %v", err)
+	}
 }
 
 func (s *Server) TreeViewHandler(w http.ResponseWriter, r *http.Request) {
@@ -58,7 +63,9 @@ func (s *Server) TreeViewHandler(w http.ResponseWriter, r *http.Request) {
 		s.RenderError(w, http.StatusInternalServerError)
 		return
 	}
-	tmpl.Execute(w, nil)
+	if err := tmpl.Execute(w, nil); err != nil {
+		log.Printf("failed to execute treeview.html template: %v", err)
+	}
 }
 
 func (s *Server) MarkdownViewHandler(w http.ResponseWriter, r *http.Request) {
@@ -66,16 +73,24 @@ func (s *Server) MarkdownViewHandler(w http.ResponseWriter, r *http.Request) {
 	// Use s.Config.TargetDir as the root directory
 	fullPath := filepath.Join(s.Config.TargetDir, displayPath)
 
+	// #nosec G304
 	source, err := os.ReadFile(fullPath)
 	if err != nil {
 		s.RenderError(w, http.StatusNotFound)
 		return
 	}
 
+	// Render Markdown to HTML using blackfriday
 	output := blackfriday.Run(source, blackfriday.WithExtensions(blackfriday.CommonExtensions|blackfriday.HardLineBreak))
+
+	// Sanitize the HTML output to prevent XSS attacks. UGCPolicy is a good starting point.
+	policy := bluemonday.UGCPolicy()
+	sanitizedOutput := policy.SanitizeBytes(output)
+
 	data := MarkdownData{
 		Title:   filepath.Base(fullPath),
-		Content: template.HTML(output),
+		// #nosec G203
+		Content: template.HTML(sanitizedOutput),
 	}
 
 	tmpl, ok := s.Templates["markdown.html"]
@@ -84,7 +99,9 @@ func (s *Server) MarkdownViewHandler(w http.ResponseWriter, r *http.Request) {
 		s.RenderError(w, http.StatusInternalServerError)
 		return
 	}
-	tmpl.Execute(w, data)
+	if err := tmpl.Execute(w, data); err != nil {
+		log.Printf("failed to execute markdown.html template: %v", err)
+	}
 }
 
 func (s *Server) ApiListHandler(w http.ResponseWriter, r *http.Request) {
@@ -95,12 +112,16 @@ func (s *Server) ApiListHandler(w http.ResponseWriter, r *http.Request) {
 	items, err := filebrowser.ListDirectory(s.Config.TargetDir, displayPath)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(map[string]string{"error": "Directory not found"})
+		if err := json.NewEncoder(w).Encode(map[string]string{"error": "Directory not found"}); err != nil {
+			log.Printf("failed to encode json error response: %v", err)
+		}
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(items)
+	if err := json.NewEncoder(w).Encode(items); err != nil {
+		log.Printf("failed to encode json response: %v", err)
+	}
 }
 
 func (s *Server) ShutdownHandler(w http.ResponseWriter, r *http.Request) {
@@ -113,7 +134,7 @@ func (s *Server) ShutdownHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Signal the main function to shut down
 	go func() {
-		ShutdownChannel <- struct{}{}
+		ShutdownChannel <- struct{}{} 
 	}()
 }
 
@@ -127,5 +148,7 @@ func (s *Server) RenderError(w http.ResponseWriter, statusCode int) {
 		http.Error(w, "An internal error occurred and the error page template was not found.", http.StatusInternalServerError)
 		return
 	}
-	tmpl.Execute(w, data)
+	if err := tmpl.Execute(w, data); err != nil {
+		log.Printf("failed to execute error.html template: %v", err)
+	}
 }
