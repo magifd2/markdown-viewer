@@ -11,7 +11,7 @@ The primary goal is to create a lightweight, portable, and easy-to-use tool for 
 - **Simplicity:** Prioritize simple, clear code over complex abstractions.
 - **Standard Library First:** Rely on Go's standard library (`net/http`) for core web functionalities to maintain a small footprint.
 - **Portability:** The final product must be a single, cross-platform binary.
-- **Security:** While serving local files, be mindful of security best practices (e.g., preventing directory traversal attacks).
+- **Security First:** Actively prevent vulnerabilities. All features and dependencies must be reviewed for security implications.
 
 ## 3. Architecture & Technology Stack
 
@@ -19,6 +19,8 @@ The primary goal is to create a lightweight, portable, and easy-to-use tool for 
 - **Web Server:** Standard `net/http` package.
 - **Markdown Parsing:** [blackfriday v2](https://github.com/russross/blackfriday)
     - **Reasoning:** Initially, `goldmark` was chosen, but persistent issues with fetching its dependencies (`go get`) in the development environment necessitated a switch. `blackfriday` is a robust, widely-used, pure Go alternative that does not have these dependency issues.
+- **HTML Sanitization:** [bluemonday](https://github.com/microcosm-cc/bluemonday)
+    - **Reasoning:** Introduced to prevent XSS attacks from malicious Markdown content. It sanitizes the HTML output from `blackfriday` before rendering.
 - **Syntax Highlighting:** [highlight.js](https://highlightjs.org/)
     - **Reasoning:** Switched from a Go-based highlighter to a client-side library to decouple it from the backend Markdown parser. `highlight.js` is powerful and supports a vast number of languages.
 - **Diagram Rendering:** [Mermaid.js](https://mermaid-js.github.io/mermaid/)
@@ -57,7 +59,15 @@ This roadmap is broken down into phases to ensure iterative and manageable devel
 - [x] Included Mermaid.js library and ensured ````mermaid` blocks are rendered.
 - [x] Created a `tests` directory with a test file for verifying functionality.
 
-### **Phase 5: UI/UX Improvements & Finalization**
+### **Phase 5: Security Hardening (v0.1.1) (Completed)**
+
+- [x] **Directory Traversal:** Replaced `http.ServeMux` with a custom router to validate request paths and prevent access to files outside the target directory.
+- [x] **Cross-Site Scripting (XSS):** Introduced `bluemonday` to sanitize HTML generated from Markdown, preventing malicious script execution.
+- **Dependency Vulnerabilities:** Updated dependencies to patch known vulnerabilities.
+- **Code Hardening:** Addressed multiple issues identified by `gosec` (unhandled errors, missing timeouts, command injection risks).
+- **Browser Auto-Open:** Re-enabled the feature with enhanced security validation.
+
+### **Phase 6: UI/UX Improvements & Finalization**
 
 - [ ] Apply CSS to improve the visual appearance of the file list and rendered Markdown.
 - [ ] Implement breadcrumb navigation to easily move between directories.
@@ -73,7 +83,7 @@ This section details the application's configuration system and command-line int
 
 The application uses `spf13/viper` for flexible configuration management. Settings are loaded from multiple sources in the following order of precedence (later ones override earlier ones):
 
-1.  **Default values:** Hardcoded defaults within the application (e.g., `port: 8888`, `open: false`, `target_dir: .`).
+1.  **Default values:** Hardcoded defaults within the application (e.g., `port: 8080`, `open: false`, `target_dir: .`).
 2.  **Configuration files:**
     *   `config.json` in `$HOME/.config/mdv/`
     *   `config.json` in the current working directory
@@ -82,7 +92,7 @@ The application uses `spf13/viper` for flexible configuration management. Settin
 
 ### 5.2. Command-Line Options
 
-The application supports the following command-line flags, parsed using Go's standard `flag` package:
+The application uses `spf13/cobra` for its command-line interface.
 
 *   `-p <port>` or `--port <port>`: Specifies the port to listen on (e.g., `-p 9000`).
 *   `-o` or `--open`: Automatically opens the default web browser to the application URL upon startup.
@@ -107,13 +117,10 @@ The application binary is named `mdv`. When built using `make build`, the execut
 
 ## Known Issues
 
-### Markdown Code Block Rendering Issues
-
 There are several known issues related to how Markdown code blocks are rendered:
 
 1.  **Incorrect Line Breaks:** Code within fenced code blocks (` ``` `) may not display with correct line breaks, appearing as a single continuous line.
 2.  **Incorrect Indentation:** The indentation of elements immediately following a code block may be incorrect, appearing at the same level as the code block itself.
 3.  **Language Specifier Displayed:** The language specifier (e.g., ` ```bash `) may be rendered as plain text within the code block, rather than being correctly interpreted for syntax highlighting.
-4.  **Mermaid Rendering Failure:** Mermaid diagrams may not render correctly, despite the presence of the Mermaid.js library and associated JavaScript logic.
 
-These issues are believed to stem from the interaction between the `blackfriday` Markdown parser's HTML output, and the client-side `highlight.js` and Mermaid.js libraries. Specifically, there appear to be discrepancies in how `blackfriday` generates the HTML structure for code blocks (e.g., `class="language-xxx"` attributes) and how `highlight.js` and Mermaid.js expect these structures to be for proper rendering and styling. Further investigation into `blackfriday`'s rendering behavior and its compatibility with client-side libraries is required.
+These issues are believed to stem from the interaction between the `blackfriday` Markdown parser's HTML output, and the client-side `highlight.js` library. Further investigation into `blackfriday`'s rendering behavior and its compatibility with client-side libraries is required.
