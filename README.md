@@ -19,7 +19,7 @@ A simple, single-binary web server that acts as a file browser and Markdown rend
     ```bash
     ./mdv
     ```
-4.  Open your web browser and navigate to `http://127.0.0.1:8080` (or the port you specify).
+4.  Open your web browser and navigate to `http://127.0.0.1:8888` (or the port you specify).
 
 ### Configuration
 
@@ -35,20 +35,10 @@ For an example configuration file, see `config.json.example`.
 
 ### Command-Line Options
 
-```
-mdv is a lightweight, single-binary Markdown viewer that turns any directory of Markdown files into a browsable, elegant documentation site.
-
-It provides a 2-pane UI to navigate and render a directory of Markdown files.
-
-Usage:
-  mdv [flags]
-
-Flags:
-  -d, --dir string   Directory to serve Markdown files from (default ".")
-  -h, --help         help for mdv
-  -o, --open         Open browser automatically
-  -p, --port int     Port to listen on (default 8080)
-```
+- `-p, --port int`: Specifies the port to listen on (default 8888).
+- `-o, --open`: Automatically opens the default web browser to the application URL upon startup.
+- `-d, --dir string`: Specifies the root directory to serve (default ".").
+- `-h, --help`: Displays the help message.
 
 ## Build from Source
 
