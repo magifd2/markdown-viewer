@@ -77,7 +77,6 @@ It provides a 2-pane UI to navigate and render a directory of Markdown files.`,
 
 		// Start the server in a goroutine
 		go func() {
-			log.Printf("Server listening on http://127.0.0.1:%d", cfg.Port)
 			if cfg.Open {
 				url := fmt.Sprintf("http://127.0.0.1:%d", cfg.Port)
 				if err := browser.Open(url); err != nil {
