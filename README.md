@@ -39,6 +39,7 @@ For an example configuration file, see `config.json.example`.
 - `-o, --open`: Automatically opens the default web browser to the application URL upon startup.
 - `-d, --dir string`: Specifies the root directory to serve (default ".").
 - `-h, --help`: Displays the help message.
+- `--version`: Displays the application version.
 
 ## Build from Source
 

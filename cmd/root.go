@@ -115,7 +115,10 @@ It provides a 2-pane UI to navigate and render a directory of Markdown files.`,
 	},
 }
 
-func Execute() {
+// Execute adds all child commands to the root command and sets flags appropriately.
+// This is called by main.main(). It only needs to happen once to the rootCmd.
+func Execute(version string) {
+	rootCmd.Version = version
 	rootCmd.PersistentFlags().IntP("port", "p", 8080, "Port to listen on")
 	rootCmd.PersistentFlags().BoolP("open", "o", false, "Open browser automatically")
 	rootCmd.PersistentFlags().StringP("dir", "d", ".", "Directory to serve Markdown files from")

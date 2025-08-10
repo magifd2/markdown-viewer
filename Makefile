@@ -9,8 +9,6 @@ GOTEST=$(GOCMD) test
 # Project details
 BINARY_NAME=mdv
 OUTPUT_DIR=bin
-# Get the module path from go.mod
-MODULE_PATH := $(shell go list -m)
 
 # Versioning
 # Get the version from the latest git tag
@@ -18,7 +16,7 @@ VERSION ?= $(shell git describe --tags --abbrev=0 2>/dev/null || echo "v0.1.0")
 # Get the git commit hash
 COMMIT_HASH ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo "dev")
 # LDFLAGS to embed version and commit info
-LDFLAGS=-ldflags "-s -w -X '$(MODULE_PATH).version=$(VERSION) (commit: $(COMMIT_HASH))'"
+LDFLAGS=-ldflags "-s -w -X 'main.version=$(VERSION) (commit: $(COMMIT_HASH))'"
 
 .PHONY: all build clean test cross-compile package-all vulncheck help
 
