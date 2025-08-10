@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"html/template"
+	"io/fs"
 	"log"
 	"net/http"
 	"net/url"
@@ -11,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"markdown-viewer/internal/assets"
 	"markdown-viewer/internal/config"
 )
 
@@ -24,13 +26,23 @@ type Server struct {
 
 // NewServer creates a new Server instance.
 func NewServer(cfg config.Config) (*Server, error) {
+	
+	embeddedStaticFS, err := assets.GetStaticFS()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get embedded static filesystem: %w", err)
+	}
+
 	s := &Server{
 		Config:   cfg,
-		staticFS: http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))),
+		staticFS: http.StripPrefix("/static/", http.FileServer(http.FS(embeddedStaticFS))),
 	}
 
 	// Load templates
-	if err := s.LoadTemplates("templates"); err != nil {
+	embeddedTemplatesFS, err := assets.GetTemplatesFS()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get embedded templates filesystem: %w", err)
+	}
+	if err := s.LoadTemplates(embeddedTemplatesFS); err != nil {
 		return nil, fmt.Errorf("failed to load templates: %w", err)
 	}
 
@@ -120,17 +132,17 @@ func (s *Server) Shutdown(ctx context.Context) error {
 }
 
 // LoadTemplates parses all html files from the templates directory
-func (s *Server) LoadTemplates(dir string) error {
+func (s *Server) LoadTemplates(templateFS fs.FS) error {
 	cache := make(map[string]*template.Template)
 
-	pages, err := filepath.Glob(filepath.Join(dir, "*.html"))
+	pages, err := fs.Glob(templateFS, "*.html")
 	if err != nil {
 		return err
 	}
 
 	for _, page := range pages {
 		name := filepath.Base(page)
-		tmpl, err := template.New(name).ParseFiles(page)
+		tmpl, err := template.New(name).ParseFS(templateFS, page)
 		if err != nil {
 			return err
 		}

@@ -5,8 +5,8 @@ A simple, single-binary web server that acts as a file browser and Markdown rend
 ## Features
 
 - **2-Pane View:** A persistent, expandable file tree on the left and a content viewer on the right.
-- **Single Binary:** No installation or external dependencies required.
-- **Local First:** Serves files and directories from the current location where you run it.
+- **Single Binary:** All UI assets (CSS, JavaScript, HTML templates) are embedded directly into the executable; no installation or external dependencies required.
+- **Local First:** Serves files and directories from the current location where you run it, with a self-contained UI.
 - **Markdown Rendering:** Renders Markdown files with GitHub-like styling, built-in syntax highlighting, and bundled Mermaid diagram support.
 - **Secure by Default:** Includes protection against directory traversal attacks and sanitizes HTML to prevent Cross-Site Scripting (XSS).
 - **Graceful Shutdown:** Shuts down safely via a UI button or `Ctrl+C`.
@@ -14,8 +14,7 @@ A simple, single-binary web server that acts as a file browser and Markdown rend
 ## Usage
 
 1.  Download the latest `mdv` binary for your operating system from the [Releases](https://github.com/magifd2/markdown-viewer/releases) page.
-2.  Place the `mdv` binary in the directory you want to browse.
-3.  Run the executable from your terminal:
+2.  Run the executable from your terminal:
     ```bash
     ./mdv
     ```

@@ -13,20 +13,21 @@ The primary goal is to create a lightweight, portable, and easy-to-use tool for 
 - **Portability:** The final product must be a single, cross-platform binary.
 - **Security First:** Actively prevent vulnerabilities. All features and dependencies must be reviewed for security implications.
 
-## 3. Architecture & Technology Stack
+- **Architecture & Technology Stack**
 
 - **Backend Language:** Go
 - **Web Server:** Standard `net/http` package.
+- **UI Assets:** All CSS, JavaScript, and HTML templates are embedded directly into the Go binary, creating a single, self-contained executable.
 - **Markdown Parsing:** [goldmark](https://github.com/yuin/goldmark)
     - **Reasoning:** Switched from `blackfriday` due to rendering quality issues, particularly with code blocks inside lists. `goldmark` is a modern, CommonMark-compliant parser with excellent GFM extension support, resulting in more accurate and predictable HTML output.
 - **HTML Sanitization:** [bluemonday](https://github.com/microcosm-cc/bluemonday)
     - **Reasoning:** Introduced to prevent XSS attacks from malicious Markdown content. It sanitizes the HTML output from `goldmark` before rendering.
 - **Syntax Highlighting:** [highlight.js](https://highlightjs.org/)
     - **Reasoning:** Switched from a Go-based highlighter to a client-side library to decouple it from the backend Markdown parser. `highlight.js` is powerful and supports a vast number of languages.
-    - **Note:** Bundled locally with the application; no CDN access required.
+    - **Note:** Bundled *within the binary*; no CDN access required.
 - **Diagram Rendering:** [Mermaid.js](https://mermaid-js.github.io/mermaid/)
     - **Reasoning:** It's a widely used standard for creating diagrams from text and can be rendered entirely on the client-side, fitting our architecture perfectly.
-    - **Note:** Bundled locally with the application; no CDN access required.
+    - **Note:** Bundled *within the binary*; no CDN access required.
 
 ## 4. Development Roadmap
 
@@ -120,7 +121,7 @@ The application binary is named `mdv`. When built using `make build`, the execut
 
 ### 6.3. Licensing and Distribution
 
-For compliance with third-party software licenses, the `NOTICE.md` file (containing licenses for bundled components like `highlight.js` and `Mermaid.js`) is included in all generated release archives (`.tar.gz`, `.zip`). This ensures that all necessary attribution and license terms are distributed alongside the application binary.
+For compliance with third-party software licenses, the `NOTICE.md` file (containing licenses for bundled components like `highlight.js` and `Mermaid.js`) is included in all generated release archives (`.tar.gz`, `.zip`). This ensures that all necessary attribution and license terms are distributed alongside the application binary, which now includes these assets embedded within it.
 
 ## Known Issues
 
